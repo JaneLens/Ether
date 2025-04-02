@@ -67,75 +67,23 @@ $this->need('header.php');
     <!-- 样式结束 -->
     <?php }?>
     <!-- 相关文章 -->
-    <?php if ($this->is('post')): ?>
-    <?php
-        // 获取当前文章的标签
-        $tags = $this->tags;
-        $relatedPosts = array();
-    
-        if (!empty($tags)) {
-            // 遍历当前文章的标签
-            foreach ($tags as $tag) {
-                // 根据标签查询相关文章
-                $db = Typecho_Db::get();
-                $query = $db->select('cid')
-                    ->from('table.relationships')
-                    ->where('mid = ?', $tag['mid'])
-                    ->where('cid != ?', $this->cid); // 排除当前文章
-    
-                $result = $db->fetchAll($query);
-    
-                // 将查询到的文章 ID 存入数组
-                foreach ($result as $row) {
-                    $relatedPosts[] = $row['cid'];
-                }
-            }
-    
-            // 去重
-            $relatedPosts = array_unique($relatedPosts);
-    
-            // 如果有相关文章
-            if (!empty($relatedPosts)) {
-                // 构建查询语句
-                $relatedQuery = $db->select('cid', 'title', 'slug', 'created', 'modified', 'authorId', 'type', 'status', 'commentsNum')
-                    ->from('table.contents')
-                    ->where('cid IN (' . implode(',', $relatedPosts) . ')')
-                    ->where('status = ?', 'publish')
-                    ->where('type = ?', 'post')
-                    ->order('created', Typecho_Db::SORT_DESC)
-                    ->limit(5); // 最多显示 5 篇
-    
-                // 执行查询
-                $relatedPosts = $db->fetchAll($relatedQuery);
-            }
-        }
-        ?>
-    
-        <?php if (!empty($relatedPosts)): ?>
-            <div class="related-posts">
-                <h3>相关文章</h3>
-                <ul class="post_related_list">
-                    <?php foreach ($relatedPosts as $post): ?>
-                        <?php
-                        // 获取文章永久链接
-                        $permalink = Typecho_Common::url(
-                            $post['slug'],
-                            $this->options->index
-                        );
-                        ?>
-                        <li>
-                            <a href="<?php echo $permalink; ?>" title="<?php echo $post['title']; ?>">
-                                <?php echo $post['title']; ?>
-                            </a>
-                        </li>
-                    <?php endforeach; ?>
-                </ul>
-            </div>
-        <?php endif; ?>
+    <?php $this->related(5)->to($relatedPosts); ?>
+    <?php if ($relatedPosts->have()): ?>
+    <div class="related-posts">
+        <h3>相关文章</h3>
+        <ul class="post_related_list">
+            <?php while ($relatedPosts->next()): ?>
+                <li>
+                    <a href="<?php $relatedPosts->permalink(); ?>">
+                        <?php $relatedPosts->title(); ?>
+                    </a>
+                </li>
+            <?php endwhile; ?>
+        </ul>
+    </div>
     <?php endif; ?>
     <!-- 评论 -->
     <?php $this->need('comments.php'); ?>
 </main>
-
 
 <?php $this->need('footer.php'); ?>
