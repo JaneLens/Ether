@@ -93,7 +93,7 @@ array_push($views, $cid);
 /* 通过邮箱生成头像地址 */
 function _getAvatarByMail($mail)
 {
-  $gravatarsUrl = Helper::options()->CustomAvatarSource ? Helper::options()->CustomAvatarSource : 'https://gravatar.helingqi.com/wavatar/';
+  $gravatarsUrl = Helper::options()->CustomAvatarSource ? Helper::options()->CustomAvatarSource : 'https://gravatar.helingqi.com/avatar/';
   $mailLower = strtolower($mail);
   $md5MailLower = md5($mailLower);
   $qqMail = str_replace('@qq.com', '', $mailLower);
